@@ -6,7 +6,7 @@ const generateSingle = () => {
     const readingsLength = Math.ceil(Math.random() * 20);
 
     return [...new Array(readingsLength)].map((reading, index) => ({
-        time: startTime - index * hour,
+        time: Date.now() - index * hour,
         reading: Math.random() * 2,
     }));
 };

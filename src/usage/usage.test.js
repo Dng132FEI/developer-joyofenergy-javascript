@@ -3,10 +3,11 @@ const { pricePlanNames, pricePlans } = require("../price-plans/price-plans");
 const { readings } = require("../readings/readings");
 const {
     average,
-    timeElapsedInHours,
+    getTimeElapsedInHours,
     usage,
     usageCost,
     usageForAllPricePlans,
+    getUsageCostForPrevWeek,
 } = require("./usage");
 
 describe("usage", () => {
@@ -33,7 +34,7 @@ describe("usage", () => {
             ],
         });
 
-        const timeElapsedMeter0 = timeElapsedInHours(
+        const timeElapsedMeter0 = getTimeElapsedInHours(
             getReadings(meters.METER0)
         );
 
@@ -93,6 +94,32 @@ describe("usage", () => {
         const usageForAllPricePlansArray = usageForAllPricePlans(
             pricePlans,
             getReadings(meters.METER2)
+        );
+
+        expect(usageForAllPricePlansArray).toEqual(expected);
+    });
+
+    it("should get usage cost for the user over the last week", () => {
+        const { getReadings } = readings({
+            [meters.METER2]: [
+                { time: Date.now(), reading: 0.3 },
+                { time: Date.now()-10000, reading: 0.4 },
+                { time: Date.now()-432000, reading: 0.5 },
+                { time: 1755268000, reading: 0.26785 },
+            ],
+        });
+
+        const req = {
+            params: {
+                smartMeterId: meters.METER2,
+            }
+        };
+
+        const expected = (0.4 * 120 * 1).toFixed(1);
+
+        const usageForAllPricePlansArray = getUsageCostForPrevWeek(
+            getReadings(meters.METER2),
+            req,
         );
 
         expect(usageForAllPricePlansArray).toEqual(expected);
